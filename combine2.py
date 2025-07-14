@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 import csv
 import threading
 import queue
-import pytz
+import pytz; import os;
 
 EVENT_ID_RE = re.compile(r'/e/.+-([0-9]+)(?=\D|$)')
 
@@ -124,6 +124,11 @@ if other_errors:
 API_BASE   = "https://www.eventbriteapi.com/v3"
 OUTPUT_CSV = "combine2.csv"
 OUTPUT_MD  = "combine2.md"
+
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__)); ## mod
+CSV_PATH = os.path.join(SCRIPT_DIR, OUTPUT_CSV);        ## mod
+MD_PATH = os.path.join(SCRIPT_DIR, OUTPUT_MD);        ## mod
+
 
 TOKENS = [
     "ADFEE3M6QKP4UHHK4RTJ","AUUSEMT6BFTDLYNMDFPU","7Z7AWALOH2TLA7XQX7OK",
@@ -279,13 +284,13 @@ def main():
     for t in threads: t.join()
 
     records.sort(key=lambda r: r["Start (PT)"])
-    with open(OUTPUT_CSV, "w", newline="", encoding="utf-8") as csvf:
+    with open(CSV_PATH, "w", newline="", encoding="utf-8") as csvf:
         writer = csv.writer(csvf)
         writer.writerow(["Event ID","Title","Organizer","Start (PT)","Address","Description","URL","Fee"])
         for r in records:
             writer.writerow([r[k] for k in ["Event ID","Title","Organizer","Start (PT)","Address","Description","URL","Fee"]])
 
-    with open(OUTPUT_MD, "w", encoding="utf-8") as md:
+    with open(MD_PATH, "w", encoding="utf-8") as md:
         md.write("# Upcoming Career & Leadership Events (Next 30 Days, SoCal)\n\n")
         for r in records:
             md.write(f"- **{r['Title']}**\n")
@@ -311,8 +316,8 @@ def main():
             info = finfo or "(no additional info)"
             print(f"  - {fid}: {ftype} — {info}")
     print(f"\nTotal runtime: {elapsed:.2f} seconds")
-    print(f"Wrote CSV → {OUTPUT_CSV}")
-    print(f"Wrote Markdown → {OUTPUT_MD}")
+    print(f"Wrote CSV → {CSV_PATH}")
+    print(f"Wrote Markdown → {MD_PATH}")
 
 if __name__ == "__main__":
     main()
